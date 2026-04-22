@@ -1,0 +1,2 @@
+sprawdzPole(tabMiny);
+        break;
