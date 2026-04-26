@@ -1,41 +1,23 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
-#include <math.h>
-#include <cctype>
-#include <memory>
-#include <fstream>
-#include <errno.h>
-#include <exception>
-#include <ctime>
-#include <cstdlib>
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+#include"plansza.h"
 const int rozmiar = 10;
 void usunPlansze(char **plansza);
 void wyswietlPlansze(char **plansza);
-char** generujPlansze();
 void generujMiny(char **tabMiny);
 void wykonajRuch(char **plansza, char **tabMiny);
 int sprawdzPole(char **tabMiny, int x, int y);
 void odkryj(char **tabMiny, char **plansza, int x, int y);
 int main(){
-    char **plansza = generujPlansze();
-    char **miny = generujPlansze();
+    char **plansza = generujPlansze(rozmiar);
+    char **miny = generujPlansze(rozmiar);
     generujMiny(miny);
     wykonajRuch(plansza, miny);
-    usunPlansze(plansza);
+    usunPlansze(plansza, rozmiar);
     return 0;
 }
-char** generujPlansze(){
-    char ** tab = new char*[rozmiar];
-    for (int i = 0; i < rozmiar; i++) {
-        *(tab + i) = new char[rozmiar];
-        for(int j = 0; j < rozmiar; j++){
-            *(*(tab + i) + j) = '.';
-        }
-    }
-    return tab;
-}
+
 void wyswietlPlansze(char **plansza){
     std::cout << "  0 1 2 3 4 5 6 7 8 9" << std::endl; 
     for (int i = 0; i < rozmiar; i++) {
@@ -46,12 +28,7 @@ void wyswietlPlansze(char **plansza){
         std::cout << std::endl;
     }
 }
-void usunPlansze(char **plansza){
-    for(int i = 0; i < rozmiar; i++){
-        delete[] *(plansza + i);
-    }
-    delete[] plansza;
-}
+
 void generujMiny(char **tabMiny){
     srand(time(NULL));
     int podstawione = 0;
@@ -80,7 +57,7 @@ void wykonajRuch(char **plansza, char **tabMiny){
             break;
         }
         
-        plansza[x][y] = static_cast<char>(sprawdzPole(tabMiny, x, y) + '0');
+        odkryj(tabMiny, plansza, x, y);
        
         wyswietlPlansze(plansza);
     }
@@ -101,4 +78,26 @@ int sprawdzPole(char **tabMiny, int x, int y){
         }
     }
     return licznik;
+}
+void odkryj(char **tabMiny, char **plansza, int x, int y) {
+    
+    if(x < 0 || x >= rozmiar || y < 0 || y >= rozmiar){
+        return;
+    }
+
+    if(plansza[x][y] != '.'){
+        return;
+    }
+
+    int minyWokol = sprawdzPole(tabMiny, x, y);
+    plansza[x][y] = static_cast<char>(minyWokol + '0');
+
+    if (minyWokol == 0) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue; // Pomiń samego siebie
+                odkryj(tabMiny, plansza, x + i, y + j);
+            }
+        }
+    }
 }

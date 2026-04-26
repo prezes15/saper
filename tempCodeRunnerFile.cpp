@@ -1,2 +1,1 @@
-sprawdzPole(tabMiny);
-        break;
+generujPlansze(rozmiar);
