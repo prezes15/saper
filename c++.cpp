@@ -2,9 +2,10 @@
 #include<cstdlib>
 #include<ctime>
 #include"plansza.h"
+#include"wyswietlanie.h"
 const int rozmiar = 10;
-void usunPlansze(char **plansza);
-void wyswietlPlansze(char **plansza);
+
+
 void generujMiny(char **tabMiny);
 void wykonajRuch(char **plansza, char **tabMiny);
 int sprawdzPole(char **tabMiny, int x, int y);
@@ -18,16 +19,7 @@ int main(){
     return 0;
 }
 
-void wyswietlPlansze(char **plansza){
-    std::cout << "  0 1 2 3 4 5 6 7 8 9" << std::endl; 
-    for (int i = 0; i < rozmiar; i++) {
-        std::cout << i << " "; 
-        for (int j = 0; j < rozmiar; j++) {
-            std::cout << plansza[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
+
 
 void generujMiny(char **tabMiny){
     srand(time(NULL));
@@ -53,13 +45,13 @@ void wykonajRuch(char **plansza, char **tabMiny){
         if(tabMiny[x][y] == '*'){
             std::cout << "koniec gry" << std::endl;
             std::cout << "\n";
-            wyswietlPlansze(tabMiny);
+            wyswietlPlansze(tabMiny, rozmiar);
             break;
         }
         
         odkryj(tabMiny, plansza, x, y);
        
-        wyswietlPlansze(plansza);
+        wyswietlPlansze(plansza, rozmiar);
     }
 
 }
