@@ -1,94 +1,107 @@
 #include<iostream>
 #include<cstdlib>
 #include<ctime>
-#include"plansza.h"
-#include"wyswietlanie.h"
-const int rozmiar = 10;
+#include"board.h" 
+#include"display.h"
 
+const int BOARD_SIZE = 10;
 
-void generujMiny(char **tabMiny);
-void wykonajRuch(char **plansza, char **tabMiny);
-int sprawdzPole(char **tabMiny, int x, int y);
-void odkryj(char **tabMiny, char **plansza, int x, int y);
-int main(){
-    char **plansza = generujPlansze(rozmiar);
-    char **miny = generujPlansze(rozmiar);
-    generujMiny(miny);
-    wykonajRuch(plansza, miny);
-    usunPlansze(plansza, rozmiar);
+void generateMines(char **mineTable);
+void performMove(char **board, char **mineTable);
+int checkField(char **mineTable, int x, int y);
+void reveal(char **mineTable, char **board, int x, int y);
+
+int main() {
+    char **board = createBoard(BOARD_SIZE);
+    char **mines = createBoard(BOARD_SIZE);
+    
+    generateMines(mines);
+    performMove(board, mines);
+    
+    deleteBoard(board, BOARD_SIZE);
     return 0;
 }
 
+void generateMines(char **mineTable) {
+    srand(static_cast<unsigned int>(time(NULL)));
+    int placed = 0;
+    while(placed < 10) {
+        int randomX = rand() % 10;
+        int randomY = rand() % 10;
+        
 
-
-void generujMiny(char **tabMiny){
-    srand(time(NULL));
-    int podstawione = 0;
-    while(podstawione < 10){
-        int losowana1 = rand() % 10;
-        int losowana2 = rand() % 10;
-        if(*(*(tabMiny + losowana1) + losowana2) == '.'){
-            *(*(tabMiny + losowana1) + losowana2) = '*';
-            podstawione++; 
+        if(*(*(mineTable + randomX) + randomY) == '.') {
+            *(*(mineTable + randomX) + randomY) = '*';
+            placed++; 
         }
     }
 }
-void wykonajRuch(char **plansza, char **tabMiny){
+
+void performMove(char **board, char **mineTable) {
     int x, y;
-    while(true){
-        std::cout << "podaj pole np 1 2: ";
+    while(true) {
+        std::cout << "Enter coordinates (e.g., 1 2): ";
         std::cin >> x >> y;
-        if(plansza[x][y] != '.'){
-            std::cout << "to pole jest odkryte" << std::endl;
+
+
+        if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+            std::cout << "Coordinates out of bounds!" << std::endl;
             continue;
         }
-        if(tabMiny[x][y] == '*'){
-            std::cout << "koniec gry" << std::endl;
+
+        if(board[x][y] != '.') {
+            std::cout << "This field is already revealed." << std::endl;
+            continue;
+        }
+
+        if(mineTable[x][y] == '*') {
+            std::cout << "Game Over!" << std::endl;
             std::cout << "\n";
-            wyswietlPlansze(tabMiny, rozmiar);
+            displayBoard(mineTable, BOARD_SIZE);
             break;
         }
         
-        odkryj(tabMiny, plansza, x, y);
-       
-        wyswietlPlansze(plansza, rozmiar);
+        reveal(mineTable, board, x, y);
+        displayBoard(board, BOARD_SIZE);
     }
-
 }
-int sprawdzPole(char **tabMiny, int x, int y){
-    int licznik = 0;
-    for(int i = -1; i <= 1; i++){
-        for(int j = -1; j <= 1; j++){
-            int sprawdzX = x + i;
-            int sprawdzY = y + j;
 
-            if(sprawdzX >= 0 && sprawdzX < rozmiar && sprawdzY >= 0 && sprawdzY < rozmiar){
-                if(tabMiny[sprawdzX][sprawdzY] == '*'){
-                    licznik++;
+int checkField(char **mineTable, int x, int y) {
+    int counter = 0;
+    for(int i = -1; i <= 1; i++) {
+        for(int j = -1; j <= 1; j++) {
+            int checkX = x + i;
+            int checkY = y + j;
+
+            if(checkX >= 0 && checkX < BOARD_SIZE && checkY >= 0 && checkY < BOARD_SIZE) {
+                if(mineTable[checkX][checkY] == '*') {
+                    counter++;
                 }
             }
         }
     }
-    return licznik;
+    return counter;
 }
-void odkryj(char **tabMiny, char **plansza, int x, int y) {
-    
-    if(x < 0 || x >= rozmiar || y < 0 || y >= rozmiar){
+
+void reveal(char **mineTable, char **board, int x, int y) {
+ 
+    if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
         return;
     }
 
-    if(plansza[x][y] != '.'){
+    if(board[x][y] != '.') {
         return;
     }
 
-    int minyWokol = sprawdzPole(tabMiny, x, y);
-    plansza[x][y] = static_cast<char>(minyWokol + '0');
+    int minesAround = checkField(mineTable, x, y);
+    board[x][y] = static_cast<char>(minesAround + '0');
 
-    if (minyWokol == 0) {
+
+    if (minesAround == 0) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                if (i == 0 && j == 0) continue; // Pomiń samego siebie
-                odkryj(tabMiny, plansza, x + i, y + j);
+                if (i == 0 && j == 0) continue; 
+                reveal(mineTable, board, x + i, y + j);
             }
         }
     }
