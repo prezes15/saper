@@ -40,9 +40,24 @@ void generateMines(char **mineTable) {
 void performMove(char **board, char **mineTable) {
     int x, y;
     while(true) {
-        std::cout << "Enter coordinates (e.g., 1 2): ";
-        std::cin >> x >> y;
+        std::cout << "Enter coordinates x: ";
+        
+        if (!(std::cin >> y)) {
+            std::cout << "Error: Please enter a natural number." << std::endl;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
 
+        std::cout << "Enter coordinates y: ";
+
+
+        if (!(std::cin >> x)) {
+            std::cout << "Error: Please enter a natural number." << std::endl;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
 
         if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
             std::cout << "Coordinates out of bounds!" << std::endl;
