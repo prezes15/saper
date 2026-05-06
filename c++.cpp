@@ -1,6 +1,7 @@
 #include<iostream>
 #include<cstdlib>
 #include<ctime>
+#include <limits>
 #include"board.h" 
 #include"display.h"
 
@@ -10,15 +11,27 @@ void generateMines(char **mineTable);
 void performMove(char **board, char **mineTable);
 int checkField(char **mineTable, int x, int y);
 void reveal(char **mineTable, char **board, int x, int y);
-
+bool checkWin(char**board);
 int main() {
-    char **board = createBoard(BOARD_SIZE);
-    char **mines = createBoard(BOARD_SIZE);
-    
-    generateMines(mines);
-    performMove(board, mines);
-    
-    deleteBoard(board, BOARD_SIZE);
+    char choice;
+    do {
+        char **board = createBoard(BOARD_SIZE);
+        char **mines = createBoard(BOARD_SIZE);
+        
+        generateMines(mines);
+        
+
+        performMove(board, mines);
+        
+        deleteBoard(board, BOARD_SIZE);
+        deleteBoard(mines, BOARD_SIZE);
+
+
+        std::cout << "Do you want play again (y/n)";
+        std::cin >> choice;
+        
+
+    } while (choice == 'y');
     return 0;
 }
 
@@ -39,45 +52,61 @@ void generateMines(char **mineTable) {
 
 void performMove(char **board, char **mineTable) {
     int x, y;
+    char action;
     while(true) {
-        std::cout << "Enter coordinates x: ";
+        std::cout << "Action: (d - discover the field f - flag the field): ";
+        std::cin >> action;
+
+        std::cout << "x: ";
+        if (!(std::cin >> x)){ 
+            continue; }
         
-        if (!(std::cin >> y)) {
-            std::cout << "Error: Please enter a natural number." << std::endl;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
+        
+        if(x == 111){ 
+            displayBoard(mineTable, BOARD_SIZE); continue; 
         }
 
-        std::cout << "Enter coordinates y: ";
-
-
-        if (!(std::cin >> x)) {
-            std::cout << "Error: Please enter a natural number." << std::endl;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
+        std::cout << "y: ";
+        if (!(std::cin >> y)){ 
+            continue; 
         }
 
         if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
-            std::cout << "Coordinates out of bounds!" << std::endl;
+            std::cout << "Poza zakresem!" << std::endl;
             continue;
         }
 
-        if(board[x][y] != '.') {
-            std::cout << "This field is already revealed." << std::endl;
-            continue;
+   
+        if (action == 'f' || action == 'F') {
+            if (board[x][y] == '.') {
+                board[x][y] = 'F'; 
+            } else if (board[x][y] == 'F') {
+                board[x][y] = '.'; 
+            } else {
+                std::cout << "You can't place a flag in an open field!" << std::endl;
+            }
+        } 
+        else if (action == 'd' || action == 'd') {
+            if (board[x][y] == 'F') {
+                std::cout << "This field is flagged! Unflag it first." << std::endl;
+                continue;
+            }
+            
+            if (mineTable[x][y] == '*') {
+                std::cout << "Game Over!" << std::endl;
+                displayBoard(mineTable, BOARD_SIZE);
+                break;
+            }
+
+            reveal(mineTable, board, x, y);
         }
 
-        if(mineTable[x][y] == '*') {
-            std::cout << "Game Over!" << std::endl;
-            std::cout << "\n";
-            displayBoard(mineTable, BOARD_SIZE);
+        displayBoard(board, BOARD_SIZE);
+
+        if(checkWin(board)) {
+            std::cout << "You won" << std::endl;
             break;
         }
-        
-        reveal(mineTable, board, x, y);
-        displayBoard(board, BOARD_SIZE);
     }
 }
 
@@ -120,4 +149,15 @@ void reveal(char **mineTable, char **board, int x, int y) {
             }
         }
     }
+}
+bool checkWin(char** board) {
+    int unrevealed = 0;
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (board[i][j] == '.' || board[i][j] == 'F') {
+                unrevealed++;
+            }
+        }
+    }
+    return unrevealed == 10;
 }

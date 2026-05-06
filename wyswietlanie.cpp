@@ -1,13 +1,33 @@
 #include <iostream>
+#include <windows.h>
 #include "display.h"
 
 void displayBoard(char **board, int size) {
-    std::cout << "  0 1 2 3 4 5 6 7 8 9" << std::endl; 
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    std::cout << "\n  "; 
+
+    SetConsoleTextAttribute(hConsole, 12); 
+    for (int k = 0; k < size; k++) {
+        std::cout << k << " ";
+    }
+    SetConsoleTextAttribute(hConsole, 7); 
+    std::cout << "\n";
+
     for (int i = 0; i < size; i++) {
-        std::cout << i << " "; 
+        SetConsoleTextAttribute(hConsole, 12); 
+        std::cout << i << " ";
+        SetConsoleTextAttribute(hConsole, 7); 
+
         for (int j = 0; j < size; j++) {
-            std::cout << board[i][j] << " ";
+            if (board[i][j] == 'F') {
+                SetConsoleTextAttribute(hConsole, 14); 
+                std::cout << board[i][j] << " ";
+                SetConsoleTextAttribute(hConsole, 7); 
+            } else {
+                std::cout << board[i][j] << " ";
+            }
         }
         std::cout << std::endl;
     }
+    std::cout << "\n";
 }
