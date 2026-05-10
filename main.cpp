@@ -17,14 +17,9 @@ int main() {
     do {
         char **board = createBoard(BOARD_SIZE);
         char **mines = createBoard(BOARD_SIZE);
-        
         generateMines(mines);
-        
-
         performMove(board, mines);
-        
         deleteBoard(board, BOARD_SIZE);
-        deleteBoard(mines, BOARD_SIZE);
 
 
         std::cout << "Do you want play again (y/n)";
@@ -36,7 +31,7 @@ int main() {
 }
 
 void generateMines(char **mineTable) {
-    srand(static_cast<unsigned int>(time(NULL)));
+    srand(time(NULL));
     int placed = 0;
     while(placed < 10) {
         int randomX = rand() % 10;
@@ -63,7 +58,8 @@ void performMove(char **board, char **mineTable) {
         
         
         if(x == 111){ 
-            displayBoard(mineTable, BOARD_SIZE); continue; 
+            displayBoard(mineTable, BOARD_SIZE); 
+            continue; 
         }
 
         std::cout << "y: ";
@@ -72,7 +68,7 @@ void performMove(char **board, char **mineTable) {
         }
 
         if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
-            std::cout << "Poza zakresem!" << std::endl;
+            std::cout << "out of range" << std::endl;
             continue;
         }
 
@@ -91,7 +87,7 @@ void performMove(char **board, char **mineTable) {
                 std::cout << "This field is flagged! Unflag it first." << std::endl;
                 continue;
             }
-            
+
             if (mineTable[x][y] == '*') {
                 std::cout << "Game Over!" << std::endl;
                 displayBoard(mineTable, BOARD_SIZE);
